@@ -500,7 +500,7 @@ func TestIfElseExpression(t *testing.T) {
 		return
 	}
 }
-/*
+
 func TestFunctionLiteralParsing(t *testing.T) {
 	input := `fn(x, y) { x + y; }`
 
@@ -668,7 +668,7 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 			}
 		}
 	}
-}*/
+}
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
