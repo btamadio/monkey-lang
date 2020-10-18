@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/btamadio/monkey_lang/src/repl"
+	"github.com/btamadio/monkey_lang/src/rppl"
 	"os"
 	"os/user"
 )
 
-func main () {
+func main() {
 	user, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("Hello %s! This is the Monkey programming language!\n", user.Username)
 	fmt.Printf("Feel free to type in some commands\n")
-	repl.Start(os.Stdin, os.Stdout)
+	rppl.Start(os.Stdin, os.Stdout)
 }

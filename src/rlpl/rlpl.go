@@ -1,4 +1,5 @@
-package repl
+// Read-Lex-Print Loop
+package rlpl
 
 import (
 	"bufio"
