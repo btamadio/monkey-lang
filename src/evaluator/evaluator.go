@@ -43,6 +43,8 @@ func Eval(node parser.Node, env *Environment) Object {
 		return evalIfExpression(node, env)
 	case *parser.IntegerLiteral:
 		return &Integer{Value: node.Value}
+	case *parser.StringLiteral:
+		return &String{Value: node.Value}
 	case *parser.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 	case *parser.FunctionLiteral:
