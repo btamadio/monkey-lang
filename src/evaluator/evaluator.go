@@ -5,6 +5,25 @@ import (
 	"github.com/btamadio/monkey_lang/src/parser"
 )
 
+var builtins = map[string]*Builtin{
+	"len": {
+		Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1",
+					len(args))
+			}
+
+			switch arg := args[0].(type){
+			case *String:
+				return &Integer{Value: int64(len(arg.Value))}
+			default:
+				return newError("argument to `len` not supported, got %s",
+					args[0].Type())
+			}
+		},
+	},
+}
+
 var (
 	NULL  = &Null{}
 	TRUE  = &Boolean{Value: true}
@@ -107,14 +126,17 @@ func evalExpressions(exps []parser.Expression, env *Environment) []Object {
 }
 
 func applyFunction(fn Object, args []Object) Object {
-	function, ok := fn.(*Function)
-	if !ok {
+	switch fn := fn.(type) {
+	default:
 		return newError("not a function: %s", fn.Type())
-	}
+	case *Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
 
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
+	case *Builtin:
+		return fn.Fn(args...)
+	}
 }
 
 func extendFunctionEnv(fn *Function, args []Object) *Environment {
@@ -136,12 +158,15 @@ func unwrapReturnValue(obj Object) Object {
 }
 
 func evalIdentifier(node *parser.Identifier, env *Environment) Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
 
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: " + node.Value)
 }
 
 func evalIfExpression(ie *parser.IfExpression, env *Environment) Object {
