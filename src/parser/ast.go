@@ -125,7 +125,7 @@ func (il *IntegerLiteral) String() string       { return il.Token.Literal }
 
 type StringLiteral struct {
 	Token lexer.Token
-	Value int64
+	Value string
 }
 
 func (sl *StringLiteral) expressionNode()      {}
