@@ -2,7 +2,6 @@ package evaluator
 
 import (
 	"github.com/btamadio/monkey_lang/src/lexer"
-	"github.com/btamadio/monkey_lang/src/object"
 	"github.com/btamadio/monkey_lang/src/parser"
 	"testing"
 )
@@ -176,7 +175,7 @@ if (10 > 1) {
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 
-		errObj, ok := evaluated.(*object.Error)
+		errObj, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("no error object retured. got=%T(%+v)",
 				evaluated, evaluated)
@@ -210,7 +209,7 @@ func TestFunctionObject(t *testing.T) {
 	input := "fn(x) { x + 2; };"
 
 	evaluated := testEval(input)
-	fn, ok := evaluated.(*object.Function)
+	fn, ok := evaluated.(*Function)
 	if !ok {
 		t.Fatalf("object is not Function. got=%T (%+v)", evaluated, evaluated)
 	}
@@ -261,8 +260,8 @@ addTwo(2);
 	testIntegerObject(t, testEval(input), 4)
 }
 
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.Integer)
+func testIntegerObject(t *testing.T, obj Object, expected int64) bool {
+	result, ok := obj.(*Integer)
 	if !ok {
 		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
 		return false
@@ -275,8 +274,8 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	return true
 }
 
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.Boolean)
+func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
+	result, ok := obj.(*Boolean)
 	if !ok {
 		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
 		return false
@@ -289,16 +288,16 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
-func testEval(input string) object.Object {
+func testEval(input string) Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
-	env := object.NewEnvironment()
+	env := NewEnvironment()
 
 	return Eval(program, env)
 }
 
-func testNullObject(t *testing.T, obj object.Object) bool {
+func testNullObject(t *testing.T, obj Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false

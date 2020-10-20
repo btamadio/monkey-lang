@@ -1,9 +1,9 @@
-package token
+package lexer
 
 type TokenType string
 
 type Token struct {
-	Type TokenType
+	Type    TokenType
 	Literal string
 }
 
@@ -15,6 +15,7 @@ const (
 	// identifiers and literals
 	IDENT = "IDENT"
 	INT = "INT"
+	STRING = "STRING"
 
 	// operators
 	ASSIGN = "="
@@ -47,13 +48,13 @@ const (
 )
 
 // language keywords are defined here
-var keywords = map[string]TokenType {
-	"fn": FUNCTION,
-	"let": LET,
-	"true": TRUE,
-	"false": FALSE,
-	"if": IF,
-	"else": ELSE,
+var keywords = map[string]TokenType{
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
 	"return": RETURN,
 }
 

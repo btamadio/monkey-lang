@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/btamadio/monkey_lang/src/evaluator"
 	"github.com/btamadio/monkey_lang/src/lexer"
-	"github.com/btamadio/monkey_lang/src/object"
 	"github.com/btamadio/monkey_lang/src/parser"
 	"io"
 )
@@ -14,7 +13,7 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
+	env := evaluator.NewEnvironment()
 
 	for {
 		_, _ = fmt.Fprintf(out, PROMPT)

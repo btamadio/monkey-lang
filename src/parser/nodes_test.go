@@ -1,7 +1,7 @@
-package ast
+package parser
 
 import (
-	"github.com/btamadio/monkey_lang/src/token"
+	"github.com/btamadio/monkey_lang/src/lexer"
 	"testing"
 )
 
@@ -9,13 +9,13 @@ func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&LetStatement{
-				Token: token.Token{Type: token.LET, Literal: "let"},
+				Token: lexer.Token{Type: lexer.LET, Literal: "let"},
 				Name: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "myVar"},
+					Token: lexer.Token{Type: lexer.IDENT, Literal: "myVar"},
 					Value: "myVar",
 				},
 				Value: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "anotherVar"},
+					Token: lexer.Token{Type: lexer.IDENT, Literal: "anotherVar"},
 					Value: "anotherVar",
 				},
 			},
