@@ -13,7 +13,7 @@ var builtins = map[string]*Builtin{
 					len(args))
 			}
 
-			switch arg := args[0].(type){
+			switch arg := args[0].(type) {
 			case *String:
 				return &Integer{Value: int64(len(arg.Value))}
 			default:
@@ -80,6 +80,22 @@ func Eval(node parser.Node, env *Environment) Object {
 			return args[0]
 		}
 		return applyFunction(function, args)
+	case *parser.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &Array{Elements: elements}
+	case *parser.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
 	case *parser.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -185,7 +201,7 @@ func evalIfExpression(ie *parser.IfExpression, env *Environment) Object {
 }
 
 func isTruthy(obj Object) bool {
-	switch obj{
+	switch obj {
 	case NULL:
 		return false
 	case TRUE:
@@ -326,6 +342,27 @@ func evalBlockStatement(block *parser.BlockStatement, env *Environment) Object {
 	}
 
 	return result
+}
+
+func evalIndexExpression(left, index Object) Object {
+	switch {
+	case left.Type() == ARRAY_OBJ && index.Type() == INTEGER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("index operator not supported: %s", left.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index Object) Object {
+	arrayObject := array.(*Array)
+	idx := index.(*Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	if idx < 0 || idx > max {
+		return NULL
+	}
+
+	return arrayObject.Elements[idx]
 }
 
 func nativeBoolToBooleanObject(input bool) *Boolean {

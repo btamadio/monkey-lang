@@ -6,7 +6,7 @@ type Lexer struct {
 	position int    // index of current char
 
 	readPosition int // index of next char after current one
-	errors []string
+	errors       []string
 }
 
 func New(input string) *Lexer {
@@ -46,7 +46,7 @@ func (l *Lexer) NextToken() Token {
 			ch := l.ch
 			l.readChar()
 			tok = Token{Type: NOT_EQ, Literal: string(ch) + string(l.ch)}
-		} else{
+		} else {
 			tok = newToken(BANG, l.ch)
 		}
 	case '/':
@@ -61,6 +61,10 @@ func (l *Lexer) NextToken() Token {
 		tok = newToken(LBRACE, l.ch)
 	case '}':
 		tok = newToken(RBRACE, l.ch)
+	case '[':
+		tok = newToken(LBRACKET, l.ch)
+	case ']':
+		tok = newToken(RBRACKET, l.ch)
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()

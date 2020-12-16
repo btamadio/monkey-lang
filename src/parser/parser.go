@@ -15,6 +15,7 @@ const (
 	PRODUCT     // *
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
+	INDEX 		// array[index]
 )
 
 var precedences = map[lexer.TokenType]int{
@@ -27,6 +28,7 @@ var precedences = map[lexer.TokenType]int{
 	lexer.SLASH:    PRODUCT,
 	lexer.ASTERISK: PRODUCT,
 	lexer.LPAREN:   CALL,
+	lexer.LBRACKET: INDEX,
 }
 
 type (
@@ -62,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(lexer.IF, p.parseIfExpression)
 	p.registerPrefix(lexer.FUNCTION, p.parseFunctionLiteral)
+	p.registerPrefix(lexer.LBRACKET, p.parseArrayLiteral)
 
 	p.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	p.registerInfix(lexer.PLUS, p.parseInfixExpression)
@@ -73,6 +76,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(lexer.LT, p.parseInfixExpression)
 	p.registerInfix(lexer.GT, p.parseInfixExpression)
 	p.registerInfix(lexer.LPAREN, p.parseCallExpression)
+	p.registerInfix(lexer.LBRACKET, p.parseIndexExpression)
 
 	// read first two tokens so curToken and peekToken are set
 	p.nextToken()
@@ -396,32 +400,51 @@ func (p *Parser) parseBlockStatement() *BlockStatement {
 
 func (p *Parser) parseCallExpression(function Expression) Expression {
 	exp := &CallExpression{Token: p.curToken, Function: function}
-	exp.Arguments = p.parseCallArguments()
+	exp.Arguments = p.parseExpressionList(lexer.RPAREN)
 	return exp
 }
 
-func (p *Parser) parseCallArguments() []Expression {
-	var args []Expression
+func (p *Parser) parseArrayLiteral() Expression {
+	array := &ArrayLiteral{Token: p.curToken}
+	array.Elements = p.parseExpressionList(lexer.RBRACKET)
 
-	if p.peekTokenIs(lexer.RPAREN) {
+	return array
+}
+
+func (p *Parser) parseExpressionList(end lexer.TokenType) []Expression {
+	var list []Expression
+
+	if p.peekTokenIs(end) {
 		p.nextToken()
-		return args
+		return list
 	}
 
 	p.nextToken()
-	args = append(args, p.parseExpression(LOWEST))
+	list = append(list, p.parseExpression(LOWEST))
 
 	for p.peekTokenIs(lexer.COMMA) {
 		p.nextToken()
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
+		list = append(list, p.parseExpression(LOWEST))
 	}
 
-	if !p.expectPeek(lexer.RPAREN) {
+	if !p.expectPeek(end) {
 		return nil
 	}
 
-	return args
+	return list
+}
+
+func (p *Parser) parseIndexExpression(left Expression) Expression {
+	exp := &IndexExpression{Token: p.curToken, Left: left}
+	p.nextToken()
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(lexer.RBRACKET) {
+		return nil
+	}
+
+	return exp
 }
 
 func (p *Parser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) {
